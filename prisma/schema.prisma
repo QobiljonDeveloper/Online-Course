@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  TEACHER
+}
+
+model Users {
+  id                  Int            @id @default(autoincrement())
+  full_name           String         @db.VarChar(60)
+  email               String         @unique() @db.VarChar(50)
+  password            String
+  role                Role           @default(USER)
+  is_active           Boolean        @default(false)
+  activation_link     String
+  refresh_token       String
+  is_teacher_approved Boolean        @default(false)
+  Notification        Notification[]
+  Course              Course[]
+
+  @@map("users")
+}
+
+model Admins {
+  id            Int            @id @default(autoincrement())
+  full_name     String         @db.VarChar(60)
+  email         String         @unique @db.VarChar(50)
+  password      String
+  is_creator    Boolean        @default(false)
+  refresh_token String         @default("")
+  Notification  Notification[]
+
+  @@map("admins")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user_id   Int?
+  admin_id  Int?
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  Users?  @relation(fields: [user_id], references: [id])
+  admin Admins? @relation(fields: [admin_id], references: [id])
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(40)
+  description String
+  Course      Course[]
+}
+
+model Course {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  price        Decimal  @db.Decimal(10, 2)
+  course_image String?
+  category_id  Int
+  teacher_id   Int
+  is_free      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  teacher  Users    @relation(fields: [teacher_id], references: [id])
+  category Category @relation(fields: [category_id], references: [id])
+
+  @@map("courses")
+}
