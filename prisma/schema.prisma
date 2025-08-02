@@ -20,17 +20,22 @@ enum Role {
 }
 
 model Users {
-  id                  Int            @id @default(autoincrement())
-  full_name           String         @db.VarChar(60)
-  email               String         @unique() @db.VarChar(50)
+  id                  Int              @id @default(autoincrement())
+  full_name           String           @db.VarChar(60)
+  email               String           @unique() @db.VarChar(50)
   password            String
-  role                Role           @default(USER)
-  is_active           Boolean        @default(false)
+  role                Role             @default(USER)
+  is_active           Boolean          @default(false)
   activation_link     String
   refresh_token       String
-  is_teacher_approved Boolean        @default(false)
+  is_teacher_approved Boolean          @default(false)
   Notification        Notification[]
   Course              Course[]
+  CourseProgress      CourseProgress[]
+  LessonProgress      LessonProgress[]
+  CoursePurchase      CoursePurchase[]
+  Payment             Payment[]
+  CourseReview        CourseReview[]
 
   @@map("users")
 }
@@ -79,8 +84,142 @@ model Course {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  teacher  Users    @relation(fields: [teacher_id], references: [id])
-  category Category @relation(fields: [category_id], references: [id])
+  teacher        Users            @relation(fields: [teacher_id], references: [id])
+  category       Category         @relation(fields: [category_id], references: [id])
+  Module         Module[]
+  CourseProgress CourseProgress[]
+  CoursePurchase CoursePurchase[]
+  Payment        Payment[]
+  CourseReview   CourseReview[]
 
   @@map("courses")
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  course_id Int
+  title     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course   @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  Lesson Lesson[]
+
+  @@map("modules")
+}
+
+model Lesson {
+  id        Int      @id @default(autoincrement())
+  video_url String   @db.VarChar(1000)
+  title     String   @db.VarChar(255)
+  is_free   Boolean  @default(false)
+  module_id Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  module         Module           @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  CourseProgress CourseProgress[]
+  LessonProgress LessonProgress[]
+
+  @@map("lessons")
+}
+
+model CourseProgress {
+  id                   Int      @id @default(autoincrement())
+  user_id              Int
+  course_id            Int
+  completed_percentage Decimal  @default(0)
+  last_lesson_id       Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user       Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course     Course  @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  lastLesson Lesson? @relation(fields: [last_lesson_id], references: [id], onDelete: SetNull)
+
+  @@unique([user_id, course_id])
+  @@map("course_progress")
+}
+
+model LessonProgress {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  lesson_id   Int
+  completedAt DateTime @default(now())
+
+  user   Users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+  @@map("lesson_progress")
+}
+
+model CourseReview {
+  id        Int      @id @default(autoincrement())
+  course_id Int
+  user_id   Int
+  rating    Int
+  comment   String   @db.VarChar(1000)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  user   Users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, course_id])
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  CANCELED
+}
+
+model CoursePurchase {
+  id         Int            @id @default(autoincrement())
+  user_id    Int
+  course_id  Int
+  payment_id Int
+  status     PurchaseStatus @default(PENDING)
+  createdAt  DateTime       @default(now())
+
+  user    Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [payment_id], references: [id], onDelete: Restrict)
+
+  @@unique([user_id, course_id])
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  user_id        Int
+  course_id      Int
+  amount         Decimal       @db.Decimal(10, 2)
+  payment_method PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  createdAt      DateTime      @default(now())
+  paid_at        DateTime?
+
+  user           Users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course         Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  CoursePurchase CoursePurchase[]
+
+  @@index([user_id])
+  @@index([course_id])
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CLICK
+  PAYME
+  UZUM
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
 }

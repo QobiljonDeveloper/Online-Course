@@ -1,4 +1,3 @@
-// src/courses/courses.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -90,13 +89,13 @@ export class CoursesService {
       where: { id },
       data: {
         ...dto,
-        price: dto.is_free === true ? "0.00" : (dto.price ?? existing.price), // agar is_free true bo‘lsa 0.00
+        price: dto.is_free === true ? "0.00" : (dto.price ?? existing.price), 
       },
     });
   }
 
   async remove(id: number) {
-    await this.findOne(id); // topilmas ekan, exception chiqadi
+    await this.findOne(id);
     return this.prisma.course.delete({ where: { id } });
   }
 }
