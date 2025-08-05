@@ -11,18 +11,36 @@ import { PurchaseStatus } from "../../../generated/prisma";
 export class HasPurchasedCourseGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
 
-  async canActivate(context: ExecutionContext) {
-    const req = context.switchToHttp().getRequest();
-    const user = req.user; // JwtAuthGuard orqali keladi
-    const courseId = Number(req.body.course_id || req.params.courseId);
-    if (!courseId) throw new ForbiddenException("Course ID topilmadi");
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
 
-    const purchase = await this.prisma.coursePurchase.findUnique({
-      where: { user_id_course_id: { user_id: user.sub, course_id: courseId } },
+    if (!user?.sub) {
+      throw new ForbiddenException("Foydalanuvchi aniqlanmadi");
+    }
+
+    const courseIdRaw =
+      request.body.course_id ||
+      request.params.courseId ||
+      request.query.course_id;
+    const courseId = Number(courseIdRaw);
+
+    if (!courseId || isNaN(courseId)) {
+      throw new ForbiddenException(
+        "Course ID topilmadi yoki noto‘g‘ri formatda"
+      );
+    }
+
+    const purchase = await this.prisma.coursePurchase.findFirst({
+      where: {
+        user_id: user.sub,
+        course_id: courseId,
+        status: PurchaseStatus.COMPLETED,
+      },
     });
 
-    if (!purchase || purchase.status !== PurchaseStatus.COMPLETED) {
-      throw new ForbiddenException("Bu kurs sotib olinmagan");
+    if (!purchase) {
+      throw new ForbiddenException("Bu kurs hali sotib olinmagan");
     }
 
     return true;

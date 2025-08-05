@@ -1,4 +1,3 @@
-// src/lessons/lessons.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -23,32 +22,62 @@ export class LessonsService {
 
   async create(dto: CreateLessonDto) {
     await this.ensureModuleExists(dto.module_id);
-    const lesson = await this.prisma.lesson.create({
+    return this.prisma.lesson.create({
       data: {
         video_url: dto.video_url,
         title: dto.title,
         is_free: dto.is_free,
         module_id: dto.module_id,
       },
+      select: {
+        id: true,
+        video_url: true,
+        title: true,
+        is_free: true,
+        module_id: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-    return this.map(lesson);
   }
 
   async findAll() {
-    const lessons = await this.prisma.lesson.findMany();
-    return lessons.map(this.map);
+    return this.prisma.lesson.findMany({
+      select: {
+        id: true,
+        video_url: true,
+        title: true,
+        is_free: true,
+        module_id: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
   }
 
   async findOne(id: number) {
-    const lesson = await this.prisma.lesson.findUnique({ where: { id } });
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        video_url: true,
+        title: true,
+        is_free: true,
+        module_id: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
     if (!lesson) throw new NotFoundException("Lesson not found");
-    return this.map(lesson);
+    return lesson;
   }
 
   async update(id: number, dto: UpdateLessonDto) {
     if (dto.module_id !== undefined) {
       await this.ensureModuleExists(dto.module_id);
     }
+
     try {
       const updated = await this.prisma.lesson.update({
         where: { id },
@@ -58,8 +87,18 @@ export class LessonsService {
           ...(dto.is_free !== undefined ? { is_free: dto.is_free } : {}),
           ...(dto.module_id !== undefined ? { module_id: dto.module_id } : {}),
         },
+        select: {
+          id: true,
+          video_url: true,
+          title: true,
+          is_free: true,
+          module_id: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
-      return this.map(updated);
+
+      return updated;
     } catch (e) {
       throw new NotFoundException("Lesson not found");
     }
@@ -72,17 +111,5 @@ export class LessonsService {
     } catch (e) {
       throw new NotFoundException("Lesson not found");
     }
-  }
-
-  private map(lesson: any) {
-    return {
-      id: lesson.id,
-      video_url: lesson.video_url,
-      title: lesson.title,
-      is_free: lesson.is_free,
-      module_id: lesson.module_id,
-      createdAt: lesson.createdAt?.toISOString(),
-      updatedAt: lesson.updatedAt?.toISOString(),
-    };
   }
 }

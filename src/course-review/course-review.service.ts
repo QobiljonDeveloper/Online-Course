@@ -11,20 +11,13 @@ import { UpdateCourseReviewDto } from "./dto/update-course-review.dto";
 @Injectable()
 export class CourseReviewService {
   constructor(private readonly prisma: PrismaService) {}
-
+  
   async create(userId: number, dto: CreateCourseReviewDto) {
-    const existing = await this.prisma.courseReview.findUnique({
-      where: {
-        user_id_course_id: { user_id: userId, course_id: dto.course_id },
-      },
-    });
-    if (existing)
-      throw new BadRequestException("Siz allaqachon review qoldirgansiz");
-
     return this.prisma.courseReview.create({
       data: { ...dto, user_id: userId },
     });
   }
+
   async findAll() {
     return this.prisma.courseReview.findMany({
       include: { user: true, course: true },

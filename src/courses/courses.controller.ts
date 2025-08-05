@@ -1,4 +1,3 @@
-// src/courses/courses.controller.ts
 import {
   Controller,
   Get,
@@ -30,6 +29,8 @@ import {
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
 import { IsTeacherGuard } from "../common/guards/isteacher.guard";
 import { IsOwnCourseGuard } from "../common/guards/isOwnCourse.guard";
+import { IsAdminGuard } from "../common/guards/isAdmin.guard";
+import { IsTeacherOrAdminGuard } from "../common/guards/teacherOrAdmin.guard";
 
 @ApiTags("Courses")
 @Controller("courses")
@@ -39,7 +40,7 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, IsTeacherGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Yangi kurs yaratish (faqat teacher)" })
   @ApiCreatedResponse({ description: "Kurs yaratildi" })

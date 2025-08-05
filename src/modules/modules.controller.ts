@@ -1,4 +1,3 @@
-// src/modules/modules.controller.ts
 import {
   Controller,
   Get,
@@ -27,6 +26,7 @@ import {
   ApiNotFoundResponse,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
+import { IsTeacherOrAdminGuard } from "../common/guards/teacherOrAdmin.guard";
 
 @ApiTags("Modules")
 @Controller("modules")
@@ -36,7 +36,7 @@ export class ModulesController {
   constructor(private readonly modulesService: ModulesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Yangi modul yaratish (autentifikatsiya talab qilinadi)",
@@ -107,7 +107,7 @@ export class ModulesController {
   }
 
   @Patch(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Modulni yangilash (autentifikatsiya talab qilinadi)",
@@ -140,7 +140,7 @@ export class ModulesController {
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Modulni o‘chirish (autentifikatsiya talab qilinadi)",

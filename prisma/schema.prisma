@@ -20,22 +20,30 @@ enum Role {
 }
 
 model Users {
-  id                  Int              @id @default(autoincrement())
-  full_name           String           @db.VarChar(60)
-  email               String           @unique() @db.VarChar(50)
+  id                  Int     @id @default(autoincrement())
+  full_name           String  @db.VarChar(60)
+  email               String  @unique() @db.VarChar(50)
   password            String
-  role                Role             @default(USER)
-  is_active           Boolean          @default(false)
+  role                Role    @default(USER)
+  is_active           Boolean @default(false)
   activation_link     String
   refresh_token       String
-  is_teacher_approved Boolean          @default(false)
-  Notification        Notification[]
-  Course              Course[]
-  CourseProgress      CourseProgress[]
-  LessonProgress      LessonProgress[]
-  CoursePurchase      CoursePurchase[]
-  Payment             Payment[]
-  CourseReview        CourseReview[]
+  is_teacher_approved Boolean @default(false)
+
+  Notification   Notification[]
+  Course         Course[]
+  CourseProgress CourseProgress[]
+  LessonProgress LessonProgress[]
+  CoursePurchase CoursePurchase[]
+  Payment        Payment[]
+  CourseReview   CourseReview[]
+  GroupMessage   GroupMessage[]
+
+  PrivateChatAsUser1 PrivateChat[]    @relation("chatUser1")
+  PrivateChatAsUser2 PrivateChat[]    @relation("chatUser2")
+  PrivateMessage     PrivateMessage[] // sender relation
+  GroupMember        GroupMember[]
+  Certificate        Certificate[]
 
   @@map("users")
 }
@@ -91,6 +99,9 @@ model Course {
   CoursePurchase CoursePurchase[]
   Payment        Payment[]
   CourseReview   CourseReview[]
+  Group          Group[]
+  PrivateChat    PrivateChat[]
+  Certificate    Certificate[]
 
   @@map("courses")
 }
@@ -165,8 +176,6 @@ model CourseReview {
 
   course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
   user   Users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([user_id, course_id])
 }
 
 enum PurchaseStatus {
@@ -219,7 +228,89 @@ enum PaymentMethod {
 
 enum PaymentStatus {
   PENDING
-  SUCCEEDED
+  COMPLETED
   FAILED
   REFUNDED
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  groupName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course      Course         @relation(fields: [courseId], references: [id])
+  messages    GroupMessage[]
+  GroupMember GroupMember[]
+
+  @@map("groups")
+}
+
+model GroupMessage {
+  id       Int      @id @default(autoincrement())
+  groupId  Int
+  senderId Int
+  content  String
+  sentAt   DateTime @default(now())
+
+  group  Group @relation(fields: [groupId], references: [id])
+  sender Users @relation(fields: [senderId], references: [id])
+
+  @@map("group_messagene")
+}
+
+model PrivateChat {
+  id        Int      @id @default(autoincrement())
+  user1_id  Int
+  user2_id  Int
+  course_id Int
+  createdAt DateTime @default(now())
+
+  user1    Users            @relation("chatUser1", fields: [user1_id], references: [id])
+  user2    Users            @relation("chatUser2", fields: [user2_id], references: [id])
+  course   Course           @relation(fields: [course_id], references: [id])
+  messages PrivateMessage[]
+
+  @@unique([user1_id, user2_id, course_id])
+  @@map("private_chat")
+}
+
+model PrivateMessage {
+  id            Int      @id @default(autoincrement())
+  privateChatId Int
+  senderId      Int
+  content       String
+  createdAt     DateTime @default(now())
+
+  privateChat PrivateChat @relation(fields: [privateChatId], references: [id])
+  sender      Users       @relation(fields: [senderId], references: [id])
+
+  @@map("private_message")
+}
+
+model GroupMember {
+  id       Int @id @default(autoincrement())
+  group_id Int
+  user_id  Int
+
+  group Group @relation(fields: [group_id], references: [id])
+  user  Users @relation(fields: [user_id], references: [id])
+
+  @@unique([group_id, user_id])
+  @@map("group_members")
+}
+
+model Certificate {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  course_id       Int
+  issued_at       DateTime @default(now())
+  certificate_url String
+
+  user   Users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, course_id])
+  @@map("certificates")
 }

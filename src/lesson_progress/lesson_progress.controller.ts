@@ -1,4 +1,3 @@
-// src/lesson-progress/lesson-progress.controller.ts
 import {
   Controller,
   Post,
@@ -25,6 +24,7 @@ import {
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
 import { LessonProgressService } from "./lesson_progress.service";
 import { CreateLessonProgressDto } from "./dto/create-lesson_progress.dto";
+import { HasPurchasedCourseGuard } from "../common/guards/hasPurchasedCourse.guard";
 
 @ApiTags("LessonProgress")
 @Controller("lesson-progress")
@@ -34,11 +34,11 @@ export class LessonProgressController {
   constructor(private readonly lessonProgressService: LessonProgressService) {}
 
   @Post("complete")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HasPurchasedCourseGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Darsni tugatish va kurs progressini yangilash" })
   @ApiCreatedResponse({
-    description: "Dars tugatildi va kurs progressi yangilandi",
+    description: "Dars tugatildi va kurs proxgressi yangilandi",
     schema: {
       example: {
         id: 1,

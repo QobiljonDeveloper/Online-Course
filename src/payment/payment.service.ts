@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePaymentDto } from "./dto/create-payment.dto";
 import { UpdatePaymentStatusDto } from "./dto/update-payment-status.dto";
-import { PaymentStatus } from "../../generated/prisma";
+import { PaymentStatus, PurchaseStatus } from "../../generated/prisma";
 
 @Injectable()
 export class PaymentsService {
@@ -33,13 +33,26 @@ export class PaymentsService {
     });
     if (!payment) throw new NotFoundException("Payment topilmadi");
 
-    return this.prisma.payment.update({
+    const updatedPayment = await this.prisma.payment.update({
       where: { id: paymentId },
       data: {
         status: dto.status,
-        paid_at: dto.status === PaymentStatus.SUCCEEDED ? new Date() : null,
+        paid_at: dto.status === PaymentStatus.COMPLETED ? new Date() : null,
       },
     });
+
+    if (dto.status === PaymentStatus.COMPLETED) {
+      await this.prisma.coursePurchase.create({
+        data: {
+          user_id: payment.user_id,
+          course_id: payment.course_id,
+          payment_id: payment.id,
+          status: PurchaseStatus.COMPLETED,
+        },
+      });
+    }
+
+    return updatedPayment;
   }
 
   async findMyPayments(userId: number) {

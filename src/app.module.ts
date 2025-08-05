@@ -15,6 +15,11 @@ import { LessonProgressModule } from './lesson_progress/lesson_progress.module';
 import { CoursePurcahseModule } from './course-purcahse/course-purcahse.module';
 import { CourseReviewModule } from './course-review/course-review.module';
 import { PaymentModule } from './payment/payment.module';
+import { GroupModule } from './group/group.module';
+import { GroupMessageModule } from './group-message/group-message.module';
+import { PrivateChatModule } from './private_chat/private_chat.module';
+import { PrivateMessageModule } from './private_message/private_message.module';
+import { CretificateModule } from './cretificate/cretificate.module';
 
 @Module({
   imports: [
@@ -33,6 +38,11 @@ import { PaymentModule } from './payment/payment.module';
     CoursePurcahseModule,
     CourseReviewModule,
     PaymentModule,
+    GroupModule,
+    GroupMessageModule,
+    PrivateChatModule,
+    PrivateMessageModule,
+    CretificateModule,
   ],
 })
 export class AppModule implements NestModule {

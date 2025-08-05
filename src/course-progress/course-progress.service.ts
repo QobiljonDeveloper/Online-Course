@@ -1,4 +1,3 @@
-// src/course-progress/course-progress.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -12,14 +11,12 @@ import { PrismaService } from "../prisma/prisma.service";
 export class CourseProgressService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // Helper: kursdagi jami darslar soni
   private async totalLessonsForCourse(courseId: number): Promise<number> {
     return this.prisma.lesson.count({
       where: { module: { course_id: courseId } },
     });
   }
 
-  // Helper: foydalanuvchi qaysi darslarni tugatganligi shu kurs bo'yicha
   private async completedLessonsCount(
     userId: number,
     courseId: number
@@ -36,13 +33,11 @@ export class CourseProgressService {
     });
   }
 
-  // Progressni qayta hisoblash va saqlash (yoki yangilash)
   private async recalcAndUpsertProgress(
     userId: number,
     courseId: number,
     lastLessonId: number | null
   ) {
-    // tekshir: user, course mavjudligini oling
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException("User not found");
 
@@ -99,7 +94,6 @@ export class CourseProgressService {
   }
 
   async update(userId: number, courseId: number, dto: UpdateCourseProgressDto) {
-    // agar last_lesson_id o'zgargan bo'lsa yoki qayta hisoblashni istasak
     return this.recalcAndUpsertProgress(
       userId,
       courseId,
@@ -107,7 +101,6 @@ export class CourseProgressService {
     );
   }
 
-  // Foydalanuvchi darsni tugatganda: lessonProgress yaratib, progressni yangilash
   async markLessonCompleted(userId: number, lessonId: number) {
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId },
@@ -123,7 +116,6 @@ export class CourseProgressService {
       update: { completedAt: new Date() },
     });
 
-    // oxirgi darsni yangilab progressni qayta hisoblash
     return this.recalcAndUpsertProgress(userId, courseId, lessonId);
   }
 }

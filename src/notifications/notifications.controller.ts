@@ -49,6 +49,15 @@ export class NotificationsController {
     return this.notificationsService.findAll();
   }
 
+  @Get("my")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Foydalanuvchining barcha bildirishnomalari" })
+  @ApiResponse({ status: 200, description: "Ro‘yxat qaytarildi" })
+  async getMyNotifications(@Req() req) {
+    const userId = req.user.userId;
+    return this.notificationsService.getUserNotifications(userId);
+  }
+
   @Get("admin")
   @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiOperation({ summary: "Adminning barcha notificationlari" })

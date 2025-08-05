@@ -1,4 +1,3 @@
-// src/course-progress/course-progress.controller.ts
 import {
   Controller,
   Get,
@@ -25,6 +24,8 @@ import {
   ApiNotFoundResponse,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
+import { HasPurchasedCourseGuard } from "../common/guards/hasPurchasedCourse.guard"
+import { IsOwnUserOrAdminGuard } from "../common/guards/isOwnUserOrAdmin.guard"
 
 @ApiTags("CourseProgress")
 @Controller("course-progress")
@@ -34,7 +35,7 @@ export class CourseProgressController {
   constructor(private readonly courseProgressService: CourseProgressService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HasPurchasedCourseGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Yangi progress yaratish yoki yangilash" })
   @ApiCreatedResponse({
@@ -59,6 +60,8 @@ export class CourseProgressController {
   }
 
   @Get("user/:userId/course/:courseId")
+  @UseGuards(JwtAuthGuard, IsOwnUserOrAdminGuard)
+  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Foydalanuvchi va kurs bo‘yicha progressni olish" })
   @ApiParam({ name: "userId", type: Number })
   @ApiParam({ name: "courseId", type: Number })
@@ -85,7 +88,7 @@ export class CourseProgressController {
   }
 
   @Patch("user/:userId/course/:courseId")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HasPurchasedCourseGuard, IsOwnUserOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Progressni yangilash (masalan last_lesson_id)" })
   @ApiOkResponse({
@@ -116,7 +119,7 @@ export class CourseProgressController {
   }
 
   @Post("lesson-complete/:lessonId/user/:userId")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HasPurchasedCourseGuard, IsOwnUserOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Foydalanuvchi darsni tugatganda progressni belgilash",

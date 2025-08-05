@@ -1,4 +1,3 @@
-// src/auth/auth.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -68,7 +67,6 @@ export class AuthService {
       },
     });
 
-    // Teacher bo‘lsa — barcha adminlarga notification yozish (user_id bilan)
     if ((dto.role ?? "USER") === "TEACHER") {
       const allAdmins = await this.prisma.admins.findMany();
 
@@ -93,7 +91,6 @@ export class AuthService {
     return { message: "Ro‘yxatdan o‘tish muvaffaqiyatli. Emailni tekshiring." };
   }
 
-  // Activate
   async activate(link: string) {
     const user = await this.prisma.users.findFirst({
       where: { activation_link: link },
@@ -114,7 +111,6 @@ export class AuthService {
     return { message: "Akkount muvaffaqiyatli faollashtirildi" };
   }
 
-  // Login user / teacher
   async login(dto: LoginDto, res: Response) {
     const user = await this.prisma.users.findUnique({
       where: { email: dto.email },
@@ -157,7 +153,6 @@ export class AuthService {
     return { accessToken, id: user.id };
   }
 
-  // Refresh user tokens
   async refresh(res: Response, userId: number) {
     const user = await this.prisma.users.findUnique({
       where: { id: userId },
@@ -202,7 +197,6 @@ export class AuthService {
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 
-  // Logout user (cookie-based)
   async logoutUserFromCookie(res: Response, refreshToken: string | undefined) {
     if (!refreshToken) {
       res.clearCookie("refreshToken", { httpOnly: true });
@@ -227,7 +221,6 @@ export class AuthService {
     return { message: "Chiqish muvaffaqiyatli amalga oshirildi" };
   }
 
-  // ==== ADMIN ====
 
   async registerAdmin(dto: CreateAdminDto) {
     const existing = await this.prisma.admins.findUnique({

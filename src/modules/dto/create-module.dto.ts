@@ -1,4 +1,3 @@
-// src/modules/dto/create-module.dto.ts
 import { ApiProperty } from "@nestjs/swagger";
 import { IsInt, IsString, MinLength, MaxLength } from "class-validator";
 

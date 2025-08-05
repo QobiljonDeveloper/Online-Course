@@ -29,7 +29,6 @@ import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Register user / teacher
   @Post("register")
   @ApiOperation({ summary: "Register user or teacher" })
   @ApiBody({ type: RegisterDto })
@@ -51,7 +50,6 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  // Activate account
   @Get("activate/:link")
   @ApiOperation({ summary: "Activate account by link" })
   @ApiResponse({
@@ -64,7 +62,6 @@ export class AuthController {
     return this.authService.activate(link);
   }
 
-  // Login user / teacher
   @Post("login")
   @ApiOperation({ summary: "Login user or teacher" })
   @ApiBody({ type: LoginDto })
@@ -87,7 +84,6 @@ export class AuthController {
     return this.authService.login(dto, res);
   }
 
-  // Refresh user token
   @Post("refresh")
   @ApiOperation({ summary: "Refresh user access token" })
   @ApiBody({
@@ -117,7 +113,6 @@ export class AuthController {
     return this.authService.refresh(res, user_id);
   }
 
-  // Logout user (cookie-based)
   @Post("logout")
   @ApiOperation({ summary: "Logout user (clears refresh token cookie)" })
   @ApiResponse({
@@ -131,7 +126,6 @@ export class AuthController {
     return this.authService.logoutUserFromCookie(res, refreshToken);
   }
 
-  // Admin login
   @Post("admin/login")
   @ApiOperation({ summary: "Admin login" })
   @ApiBody({
@@ -158,7 +152,6 @@ export class AuthController {
     return this.authService.loginAdmin(dto, res);
   }
 
-  // Refresh admin token
   @Post("admin/refresh")
   @ApiOperation({ summary: "Refresh admin access token" })
   @ApiBody({
@@ -188,7 +181,6 @@ export class AuthController {
     return this.authService.refreshAdmin(res, admin_id);
   }
 
-  // Logout admin
   @Post("admin/logout")
   @ApiOperation({ summary: "Logout admin (clears refresh token cookie)" })
   @ApiResponse({

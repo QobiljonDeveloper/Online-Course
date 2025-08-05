@@ -1,4 +1,3 @@
-// src/common/guards/isCreator.guard.ts
 import {
   CanActivate,
   ExecutionContext,

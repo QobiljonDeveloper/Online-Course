@@ -13,7 +13,7 @@ import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import {
-  ApiTags,
+ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
@@ -57,7 +57,7 @@ export class UsersController {
     return this.usersService.approveTeacher(+id);
   }
 
-  @Get(":id")
+@Get(":id")
   @UseGuards(JwtAuthGuard, SelfGuard)
   @ApiOperation({ summary: "Get user by ID" })
   @ApiParam({ name: "id", type: Number })

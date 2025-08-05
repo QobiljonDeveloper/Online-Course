@@ -1,4 +1,3 @@
-// src/common/guards/is-own-course.guard.ts
 import {
   CanActivate,
   ExecutionContext,

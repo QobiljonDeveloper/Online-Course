@@ -1,4 +1,3 @@
-// src/lessons/dto/create-lesson.dto.ts
 import { ApiProperty } from "@nestjs/swagger";
 import {
   IsBoolean,

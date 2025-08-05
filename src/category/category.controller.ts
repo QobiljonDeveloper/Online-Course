@@ -1,4 +1,3 @@
-// src/categories/categories.controller.ts
 import {
   Controller,
   Get,
@@ -29,6 +28,7 @@ import {
   ApiResponse,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
+import { IsAdminGuard } from "../common/guards/isAdmin.guard";
 
 @ApiTags("Categories")
 @Controller("categories")
@@ -38,7 +38,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Yangi kategoriya yaratish (autentifikatsiya talab qilinadi)",
@@ -112,7 +112,7 @@ export class CategoriesController {
   }
 
   @Patch(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Kategoriya yangilash (autentifikatsiya talab qilinadi)",
@@ -141,7 +141,7 @@ export class CategoriesController {
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Kategoriya o‘chirish (autentifikatsiya talab qilinadi)",

@@ -15,6 +15,13 @@ export class NotificationsService {
     return this.prisma.notification.findMany();
   }
 
+  async getUserNotifications(userId: number) {
+    return this.prisma.notification.findMany({
+      where: { user_id: userId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async getAdminNotifications(adminId: number, unreadOnly: boolean = false) {
     return this.prisma.notification.findMany({
       where: {

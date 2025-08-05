@@ -1,4 +1,3 @@
-// src/lessons/lessons.controller.ts
 import {
   Controller,
   Get,
@@ -27,6 +26,7 @@ import {
   ApiNotFoundResponse,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../common/guards/jwtAuth.guard";
+import { IsTeacherOrAdminGuard } from "../common/guards/teacherOrAdmin.guard";
 
 @ApiTags("Lessons")
 @Controller("lessons")
@@ -36,7 +36,7 @@ export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Yangi dars yaratish (autentifikatsiya talab qilinadi)",
@@ -113,7 +113,7 @@ export class LessonsController {
   }
 
   @Patch(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Darsni yangilash (autentifikatsiya talab qilinadi)",
@@ -148,7 +148,7 @@ export class LessonsController {
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, IsTeacherOrAdminGuard)
   @ApiBearerAuth("access-token")
   @ApiOperation({
     summary: "Darsni o‘chirish (autentifikatsiya talab qilinadi)",

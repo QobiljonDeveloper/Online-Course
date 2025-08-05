@@ -22,7 +22,7 @@ export class MailService {
       await this.mailerService.sendMail({
         to: email,
         subject: "Accountingizni faollashtiring",
-        template: "./confirmation", // <--- confirmation.hbs papkada bo‘lishi kerak
+        template: "./confirmation", 
         context: {
           name: full_name,
           url,

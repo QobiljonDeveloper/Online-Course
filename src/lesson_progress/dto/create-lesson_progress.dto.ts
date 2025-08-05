@@ -9,4 +9,8 @@ export class CreateLessonProgressDto {
   @ApiProperty({ example: 3, description: "Foydalanuvchi ID si" })
   @IsInt()
   user_id: number;
+
+  @ApiProperty({ example: 3, description: "Course ID si" })
+  @IsInt()
+  course_id: number;
 }

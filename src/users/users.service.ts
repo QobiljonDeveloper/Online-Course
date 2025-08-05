@@ -71,7 +71,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    await this.findOne(id); // mavjudligini tekshiramiz
+    await this.findOne(id); 
     return this.prisma.users.update({
       where: { id },
       data: updateUserDto,
@@ -79,7 +79,7 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    await this.findOne(id); // mavjudligini tekshiramiz
+    await this.findOne(id); 
     return this.prisma.users.delete({
       where: { id },
     });
