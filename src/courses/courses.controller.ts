@@ -10,6 +10,7 @@ import {
   Logger,
   ParseIntPipe,
   NotFoundException,
+  Query,
 } from "@nestjs/common";
 import { CoursesService } from "./courses.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
@@ -31,6 +32,7 @@ import { IsTeacherGuard } from "../common/guards/isteacher.guard";
 import { IsOwnCourseGuard } from "../common/guards/isOwnCourse.guard";
 import { IsAdminGuard } from "../common/guards/isAdmin.guard";
 import { IsTeacherOrAdminGuard } from "../common/guards/teacherOrAdmin.guard";
+import { FilterCourseDto } from "./dto/filter-course-dto";
 
 @ApiTags("Courses")
 @Controller("courses")
@@ -55,10 +57,18 @@ export class CoursesController {
   }
 
   @Get()
-  @ApiOperation({ summary: "Barcha kurslarni olish" })
-  @ApiOkResponse({ description: "Kurslar ro‘yxati" })
-  async findAll() {
-    return this.coursesService.findAll();
+  @ApiOperation({ summary: "Kurslarni qidirish" })
+  @ApiOkResponse({ description: "Qidirilgan Kurslar ro'yxati" })
+  @Get()
+  findAll() {
+    return this.coursesService.findAll(); 
+  }
+
+  @Get("search")
+  @ApiOperation({ summary: "Kurslarni filterlab qidirish" })
+  @ApiOkResponse({ description: "Filterlangan kurslar ro‘yxati" })
+  findFiltered(@Query() filter: FilterCourseDto) {
+    return this.coursesService.findFiltered(filter);
   }
 
   @Get(":id")

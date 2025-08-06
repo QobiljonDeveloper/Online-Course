@@ -23,12 +23,30 @@ export class HasPurchasedCourseGuard implements CanActivate {
       request.body.course_id ||
       request.params.courseId ||
       request.query.course_id;
+
     const courseId = Number(courseIdRaw);
 
     if (!courseId || isNaN(courseId)) {
       throw new ForbiddenException(
         "Course ID topilmadi yoki noto‘g‘ri formatda"
       );
+    }
+
+    if (user.role === "ADMIN") {
+      return true;
+    }
+
+    if (user.is_creator) {
+      const isCreator = await this.prisma.course.findFirst({
+        where: {
+          id: courseId,
+          teacher_id: user.sub,
+        },
+      });
+
+      if (isCreator) {
+        return true;
+      }
     }
 
     const purchase = await this.prisma.coursePurchase.findFirst({
@@ -39,10 +57,12 @@ export class HasPurchasedCourseGuard implements CanActivate {
       },
     });
 
-    if (!purchase) {
-      throw new ForbiddenException("Bu kurs hali sotib olinmagan");
+    if (purchase) {
+      return true;
     }
 
-    return true;
+    throw new ForbiddenException(
+      "Bu kurs hali sotib olinmagan yoki sizda ruxsat yo‘q"
+    );
   }
 }

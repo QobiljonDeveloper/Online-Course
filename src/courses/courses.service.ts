@@ -6,6 +6,7 @@ import {
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
+import { FilterCourseDto } from "./dto/filter-course-dto";
 
 @Injectable()
 export class CoursesService {
@@ -59,6 +60,68 @@ export class CoursesService {
       orderBy: { createdAt: "desc" },
     });
   }
+  async findFiltered(filter: FilterCourseDto) {
+    const {
+      search,
+      category_id,
+      is_free,
+      minPrice,
+      maxPrice,
+      minRating,
+      maxRating,
+    } = filter;
+
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    if (category_id) where.category_id = parseInt(category_id);
+    if (is_free !== undefined) where.is_free = is_free === "true";
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = parseFloat(minPrice);
+      if (maxPrice) where.price.lte = parseFloat(maxPrice);
+    }
+
+    
+    const courses = await this.prisma.course.findMany({
+      where,
+      include: {
+        teacher: { select: { id: true, full_name: true, email: true } },
+        category: true,
+        CourseReview: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const filteredCourses = courses
+      .map((course) => {
+        const ratings = course.CourseReview.map((r) => r.rating);
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((acc, r) => acc + r, 0) / ratings.length
+            : 0;
+
+        return {
+          ...course,
+          averageRating: Number(averageRating.toFixed(2)),
+        };
+      })
+      .filter((course) => {
+        const min = minRating ? parseFloat(minRating) : 0;
+        const max = maxRating ? parseFloat(maxRating) : 5;
+
+        return course.averageRating >= min && course.averageRating <= max;
+      });
+
+    return filteredCourses;
+  }
 
   async findOne(id: number) {
     const course = await this.prisma.course.findUnique({
@@ -89,7 +152,7 @@ export class CoursesService {
       where: { id },
       data: {
         ...dto,
-        price: dto.is_free === true ? "0.00" : (dto.price ?? existing.price), 
+        price: dto.is_free === true ? "0.00" : (dto.price ?? existing.price),
       },
     });
   }
